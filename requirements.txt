@@ -5,3 +5,5 @@ yfinance
 matplotlib
 seaborn
 scipy
+requests
+pandas_market_calendars
