@@ -20,8 +20,6 @@ def load_valid_tickers(filename="valid_sp500_tickers.txt"):
     with open(filename, "r") as f:
         return set(line.strip().upper() for line in f if line.strip())
 
-def get_user_input():
-    valid_tickers = load_valid_tickers()
 
 def get_price_data(tickers, start_date, end_date):
     # Download price data from Yahoo Finance of the given tickers and date range
@@ -72,7 +70,9 @@ def plot_returns_with_var(portfolio_ret, hist_var, param_var, monte_carlo_var):
     plt.ylabel('Frequency')
     plt.legend()
     plt.grid(True)
-    plt.show()
+    plt.savefig('static/portfolio_var_plot.png')
+    plt.close()
+
 
 def monte_carlo_var(portfolio_returns, confidence_level=0.95, num_simulations=10000):
     mean_return = portfolio_returns.mean()
@@ -134,47 +134,29 @@ def get_user_input():
     return tickers, weights, start_date, end_date
 
 
-def run_portfolio_analysis():
-    try:
-        tickers, weights, start_date, end_date = get_user_input()
-        prices = get_price_data(tickers, start_date, end_date)
+def run_portfolio_analysis_web(tickers, weights, start_date, end_date, return_prices=False):
+    prices = get_price_data(tickers, start_date, end_date)
+    if prices.empty:
+        raise ValueError("No price data found for the given date range.")
 
-        if prices.empty:
-            raise ValueError("No price data found for the given date range.")
+    returns = compute_daily_returns(prices)
+    port_ret = portfolio_returns(returns, weights)
 
-        returns = compute_daily_returns(prices)
-        port_ret = portfolio_returns(returns, weights)
+    if port_ret.empty:
+        raise ValueError("No portfolio returns computed. Possibly insufficient data.")
 
-        if port_ret.empty:
-            raise ValueError("No portfolio returns computed. Possibly insufficient data.")
+    result = {
+        "volatility": portfolio_volatility(port_ret),
+        "historical_var": historical_var(port_ret),
+        "parametric_var": parametric_var(port_ret),
+        "monte_carlo_var": monte_carlo_var(port_ret),
+    }
 
-        vol = portfolio_volatility(port_ret)
-        var_95 = historical_var(port_ret)
-        param_var_95 = parametric_var(port_ret)
-        mc_var_95 = monte_carlo_var(port_ret)
+    if return_prices:
+        result["prices"] = prices
+        result["returns"] = port_ret
 
-        print(f"Annualized Volatility: {vol:.2%}")
-        print(f"Historical VaR (95%): {var_95:.2%}")
-        print(f"Parametric VaR (95%): {param_var_95:.2%}")
-        print(f"Monte Carlo VaR (95%): {mc_var_95:.2%}")
-
-        plot_returns_with_var(port_ret, var_95, param_var_95, mc_var_95)
-
-    except ValueError as ve:
-        print(f"❌ Input error: {ve}")
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+    return result
 
 
 
-if __name__ == "__main__":
-    '''
-    #Quick test
-    tickers = ['AAPL', 'MSFT', 'TSLA']
-    weights = [0.4, 0.4, 0.2]
-    start_date = '2022-01-01'
-    end_date = '2023-01-01'
-    '''
-    
-    
-    run_portfolio_analysis()

@@ -2,6 +2,7 @@ import pandas as pd
 import yfinance as yf
 import time
 
+
 def scrape_sp500_valid_tickers():
     # Scrape the S&P 500 tickers from Wikipedia
     url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
