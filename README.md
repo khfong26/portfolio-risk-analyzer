@@ -1,50 +1,100 @@
-# Portfolio Risk Analyzer
+# 📊 Portfolio Risk Analyzer
 
-A Flask-based web application for analyzing stock portfolios, calculating risk metrics, and visualizing returns. This tool helps users understand portfolio volatility, Value at Risk (VaR), and cumulative performance through interactive graphs.
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-lightgrey.svg)](https://flask.palletsprojects.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+A web-based tool for analyzing portfolio risk, visualizing historical performance, and running simulations such as Monte Carlo forecasting.  
+Built with **Flask**, **Pandas**, **Matplotlib**, and **yfinance**.
 
 ---
 
-## Features
+## 🚀 Features
 
-- **Portfolio Metrics**
-  - Annualized volatility
-  - Historical VaR (95%)
-  - Parametric VaR (95%)
-  - Monte Carlo VaR (95%)
-
-- **Graphs**
+- Enter a list of S&P 500 tickers and their weights for analysis
+- Fetch historical price data via `yfinance`
+- Calculate:
+  - Daily returns
+  - Cumulative returns
+  - Portfolio volatility
+  - Value at Risk (historical, parametric, Monte Carlo)
+- Generate visualizations:
   - Cumulative returns over time
   - Return distribution histogram
-  - Monte Carlo simulation of portfolio performance
-
-- **Validations**
-  - Only valid S&P 500 tickers accepted
-  - Weights must sum to 1
-  - Date range must include trading days
-
-- **Web Interface**
-  - User-friendly form for entering tickers, weights, and dates
-  - Results displayed in tables and interactive graphs
+  - Monte Carlo simulation outcomes
+- Web-based frontend for easy interaction and visualization
+- Robust input validation and error handling
 
 ---
 
-## Installation
+## 📂 Project Structure
 
-1. Clone the repository:  
-   git clone https://github.com/khfong26/portfolio-risk-analyzer.git
-   cd portfolio-risk-analyzer/app
-2. Create and activate a virtual environment:
-  python -m venv venv
-  source venv/bin/activate      # Linux/Mac
-  venv\Scripts\activate         # Windows
-3. Install dependencies:
-  pip install -r requirements.txt
-4. Run the app:
-  python app.py
+```
+portfolio-risk-analyzer/
+│
+├── app/                  # Flask app & backend logic
+│   ├── static/           # Generated graphs
+│   ├── templates/        # HTML templates
+│   ├── plotting.py       # Graph creation functions
+│   ├── risk_metrics.py   # Core portfolio analysis
+│   └── app.py            # Flask app entry point
+│
+├── tests/                # Unit tests
+├── requirements.txt      # Python dependencies
+├── README.md             # Project documentation
+├── LICENSE               # MIT license
+└── screenshots/          # Example screenshots (add this folder)
+```
 
-## Usage
-Enter ticker symbols from the S&P 500.
-Enter corresponding portfolio weights (must sum to 1).
-Select a valid start and end date (trading days only).
-Submit the form to view portfolio metrics and graphs.
+---
 
+## ⚙️ Installation & Usage
+
+1. **Clone the repository**
+    ```sh
+    git clone https://github.com/khfong26/portfolio-risk-analyzer.git
+    cd portfolio-risk-analyzer
+    ```
+
+2. **Create and activate a virtual environment** (recommended)
+    ```sh
+    python -m venv venv
+    # On Windows:
+    venv\Scripts\activate
+    # On macOS/Linux:
+    source venv/bin/activate
+    ```
+
+3. **Install dependencies**
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+4. **Run the app**
+    ```sh
+    python app/app.py
+    ```
+    Then open your browser and go to:  
+    [http://127.0.0.1:5000](http://127.0.0.1:5000)
+
+---
+
+## 🖼 Example Output
+
+| Home Page (`front_page.png`) | Results Page (Top) (`results_page_1.png`) | Results Page (Bottom) (`results_page_2.png`) |
+|-----------------------------|-------------------------------------------|----------------------------------------------|
+| ![Home Page](screenshots/front_page.png) | ![Results Page Top](screenshots/results_page_1.png) | ![Results Page Bottom](screenshots/results_page_2.png) |
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 💡 Future Improvements
+
+- Enhanced frontend styling
+- More detailed risk metrics (e.g., max drawdown, Sharpe ratio)
+- Ability to save & load portfolio configurations
+- Support for different data sources beyond Yahoo Finance
