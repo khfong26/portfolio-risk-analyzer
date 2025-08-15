@@ -1,106 +1,77 @@
 from flask import Flask, render_template, request
-import pandas as pd
-import os
 from datetime import datetime
 from risk_metrics import load_valid_tickers, run_portfolio_analysis_web
-from plotting import plot_cumulative_returns, plot_return_histogram, plot_monte_carlo
 
 app = Flask(__name__)
 
-# Load valid tickers once at startup
-valid_tickers = load_valid_tickers()
-
-# Ensure static/graphs folder exists
-GRAPH_FOLDER = os.path.join(app.root_path, "static", "graphs")
-os.makedirs(GRAPH_FOLDER, exist_ok=True)
-
-
-
-# Metric explanations
-metric_explanations = {
-    "volatility": "Annualized standard deviation of portfolio returns.",
-    "historical_var": "95% historical Value at Risk: worst expected loss based on historical returns.",
-    "parametric_var": "95% parametric Value at Risk: assumes normal distribution of returns.",
-    "monte_carlo_var": "95% Monte Carlo Value at Risk: simulated losses using random sampling."
-}
-
 @app.route("/", methods=["GET", "POST"])
 def index():
+    error = None
+    metrics = {
+        "volatility": "N/A",
+        "historical_var": "N/A",
+        "parametric_var": "N/A",
+        "monte_carlo_var": "N/A",
+    }
+
     if request.method == "POST":
+        # Get form data
         tickers = request.form.getlist("tickers[]")
         weights = request.form.getlist("weights[]")
         start_date = request.form.get("start_date")
         end_date = request.form.get("end_date")
 
-        # --- Clean & validate tickers ---
-        tickers = [t.strip().upper() for t in tickers if t.strip()]
-        invalid = [t for t in tickers if t not in valid_tickers]
-        if invalid:
-            return render_template("index.html", error=f"Invalid tickers: {', '.join(invalid)}")
+        # Convert tickers to uppercase for validation and processing
+        tickers = [t.upper() for t in tickers]
 
-        # --- Clean & validate weights ---
+        # Validate tickers and weights
+        valid_tickers = set(load_valid_tickers())
         try:
-            weights = [float(w) for w in weights if w.strip()]
+            weights = [float(w) for w in weights]
         except ValueError:
-            return render_template("index.html", error="Weights must be numbers.")
+            error = "All weights must be numbers."
+            return render_template("index.html", error=error)
 
-        if len(weights) != len(tickers):
-            return render_template("index.html", error="Number of weights must match number of tickers.")
-        
-        if not abs(sum(weights) - 1.0) < 1e-5:
-            return render_template("index.html", error="Weights must sum to 1.0")
+        if not tickers or not weights or len(tickers) != len(weights):
+            error = "Please provide the same number of tickers and weights."
+            return render_template("index.html", error=error)
 
-        # --- Validate date inputs ---
+        if not all(t in valid_tickers for t in tickers):
+            error = "One or more tickers are invalid."
+            return render_template("index.html", error=error)
+
+        if not abs(sum(weights) - 1.0) < 1e-6:
+            error = "Weights must sum to 1."
+            return render_template("index.html", error=error)
+
+        # Validate dates
         try:
             datetime.strptime(start_date, "%Y-%m-%d")
             datetime.strptime(end_date, "%Y-%m-%d")
-        except ValueError:
-            return render_template("index.html", error="Dates must be in YYYY-MM-DD format.")
+        except Exception:
+            error = "Invalid date format."
+            return render_template("index.html", error=error)
 
-        # --- Run portfolio analysis ---
+        # Run analysis
         try:
-            result = run_portfolio_analysis_web(tickers, weights, start_date, end_date, return_prices=True)
-            metrics = {k: result[k] for k in ["volatility", "historical_var", "parametric_var", "monte_carlo_var"]}
-            price_data = result["returns"]
-        except ValueError as e:
-            return render_template("index.html", error=str(e))
+            result = run_portfolio_analysis_web(
+                tickers, weights, start_date, end_date
+            )
+            for key in metrics:
+                value = result.get(key)
+                metrics[key] = value if value is not None else "N/A"
         except Exception as e:
-            return render_template("index.html", error=f"Unexpected error: {e}")
+            error = str(e)
 
-        # --- Generate graphs ---
-        # filenames
-        graph_filenames = {
-            "cumulative_returns": "cumulative_returns.png",
-            "return_histogram": "return_histogram.png",
-            "monte_carlo": "monte_carlo.png"
-        }
-
-        graph_paths = {name: os.path.join(GRAPH_FOLDER, filename) for name, filename in graph_filenames.items()}
-
-        plot_cumulative_returns(price_data, save_path=graph_paths["cumulative_returns"])
-        plot_return_histogram(price_data, save_path=graph_paths["return_histogram"])
-        plot_monte_carlo(price_data, save_path=graph_paths["monte_carlo"])
-
-        graph_urls = {name: "/static/graphs/" + filename for name, filename in graph_filenames.items()}
-
-
-
-        # --- Prepare portfolio table ---
-        df = pd.DataFrame({"Ticker": tickers, "Weight": weights})
-
+        # Render results page with metrics and error (if any)
         return render_template(
             "results.html",
-            tables=[df.to_html(index=False)],
-            titles=df.columns.values,
-            metrics=metrics,
-            start_date=start_date,
-            end_date=end_date,
-            graphs=graph_urls,
-            metric_explanations=metric_explanations
+            error=error,
+            **metrics
         )
 
-    return render_template("index.html")
-
+    # GET request: show the input form
+    return render_template("index.html", error=error)
 
 if __name__ == "__main__":
     app.run(debug=True)
