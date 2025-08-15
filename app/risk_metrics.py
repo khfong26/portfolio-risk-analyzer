@@ -6,35 +6,51 @@ import matplotlib.pyplot as plt
 import pandas_market_calendars as mcal
 from datetime import datetime
 
-def is_trading_period(start, end):
-    try:
-        nyse = mcal.get_calendar('NYSE')
-        schedule = nyse.schedule(start_date=start, end_date=end)
-        return not schedule.empty
-    except Exception as e:
-        print(f"Error checking trading calendar: {e}")
-        return False
+def is_trading_period(start: datetime, end: datetime) -> bool:
+    """
+    Returns True if the period includes at least one weekday (Mon-Fri).
+    """
+    # Check if any day in the range is a weekday
+    days = pd.date_range(start, end)
+    return any(day.weekday() < 5 for day in days)
+
 
 
 def load_valid_tickers(filename="valid_sp500_tickers.txt"):
+    """
+    Load valid tickers from a file, return as a list.
+    """
     with open(filename, "r") as f:
-        return set(line.strip().upper() for line in f if line.strip())
+        tickers = [line.strip() for line in f if line.strip()]
+    return tickers
 
 
 def get_price_data(tickers, start_date, end_date):
-    # Download price data from Yahoo Finance of the given tickers and date range
-    data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=False)['Adj Close']
-    return data.dropna()
+    """
+    Download price data from Yahoo Finance for the given tickers and date range.
+    Returns the adjusted close prices as a DataFrame.
+    """
+    data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=False)
+    # If only one ticker, data['Adj Close'] is a Series; convert to DataFrame
+    adj_close = data['Adj Close'] if 'Adj Close' in data else data
+    if isinstance(adj_close, pd.Series):
+        adj_close = adj_close.to_frame()
+    adj_close = adj_close.dropna(axis=0, how='all')
+    return adj_close
 
-def compute_daily_returns(price_df):
-    # Compute daily returns from price data.
-    return price_df.pct_change().dropna()
+def compute_daily_returns(price_df: pd.DataFrame) -> pd.DataFrame:
+    return price_df.pct_change(fill_method=None).dropna()
 
-def portfolio_returns(daily_returns, weights):
-    # Calculate portfolio daily returns given individual daily returns 
-    # and percentage of each stock in portfolio.
+def portfolio_returns(returns: pd.DataFrame, weights) -> pd.Series:
+    """
+    Calculate portfolio returns given asset returns and weights.
+    """
+    if len(weights) != returns.shape[1]:
+        raise ValueError("Weights length must match number of assets")
+    if returns.empty:
+        return pd.Series(dtype=float)
     weights = np.array(weights)
-    return daily_returns.dot(weights)
+    return returns.dot(weights)
 
 def portfolio_volatility(portfolio_ret):
     # Calculate annualized volatility of portfolio returns.
