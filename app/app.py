@@ -12,6 +12,10 @@ def index():
         "historical_var": "N/A",
         "parametric_var": "N/A",
         "monte_carlo_var": "N/A",
+        "sharpe_ratio": "N/A",
+        "max_drawdown": "N/A",
+        "sortino_ratio": "N/A",
+        "beta": "N/A",
     }
 
     if request.method == "POST":
@@ -60,6 +64,7 @@ def index():
             for key in metrics:
                 value = result.get(key)
                 metrics[key] = value if value is not None else "N/A"
+
         except Exception as e:
             error = str(e)
 
