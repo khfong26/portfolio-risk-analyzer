@@ -8,3 +8,6 @@ scipy
 requests
 pandas_market_calendars
 pytest
+xgboost # optional, if using xgboost
+lightgbm # optional, if using lightgbm
+scikit-learn
