@@ -1,4 +1,4 @@
-streamlit
+flask
 pandas
 numpy
 yfinance
@@ -7,3 +7,4 @@ seaborn
 scipy
 requests
 pandas_market_calendars
+pytest
