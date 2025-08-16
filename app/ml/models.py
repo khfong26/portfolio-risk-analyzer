@@ -23,12 +23,22 @@ except ImportError:
 # Load master features and importances
 df = pd.read_csv("sp500_master_features.csv")
 
-# You may want to load/import your feature importances from a file or rerun the importance calculation here.
-# For this example, let's assume you have a list of features sorted by importance:
 feature_importance_order = [
-    'volatility_10d', 'return_21d', 'return_5d', 'return_1d', 'rsi_14', 'volume_avg_21d',
-    'macd_hist', 'macd_signal', 'volume_avg_10d', 'momentum_10d', 'macd', 'momentum_21d',
-    'ma_50', 'ma_20', 'ma_5'
+    'return_21d',
+    'return_5d',
+    'return_1d',
+    'rsi_14',
+    'ticker_encoded',  
+    'volume_avg_21d',
+    'macd_hist',
+    'macd_signal',
+    'volume_avg_10d',
+    'momentum_10d',
+    'macd',
+    'ma_50',
+    'momentum_21d',
+    'ma_20',
+    'ma_5'
 ]
 
 target = 'target_volatility_10d'
