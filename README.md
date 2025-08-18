@@ -43,7 +43,7 @@ portfolio-risk-analyzer/
 ├── requirements.txt      # Python dependencies
 ├── README.md             # Project documentation
 ├── LICENSE               # MIT license
-└── screenshots/          # Example screenshots (add this folder)
+└── screenshots/          # Example screenshots 
 ```
 
 ---
