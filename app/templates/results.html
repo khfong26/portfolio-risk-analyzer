@@ -20,92 +20,115 @@
         <div class="error">{{ error }}</div>
     {% endif %}
 
-    {% if mode == "ml" %}
-        <div class="metric">
-            <div class="metric-title">Predicted 10-Day Volatility:</div>
-            <div>{{ prediction | round(6) }}</div>
-            <div class="explanation">
-                This is the predicted 10-day volatility for your selected ticker, based on the machine learning model.
+                {% if mode == "ml" %}
+            <h2>Predicted 10-Day Volatility (ML Model)</h2>
+            <table border="1" cellpadding="6">
+                <tr>
+                    <th>Ticker</th>
+                    <th>Predicted 10d Volatility</th>
+                    <th>Status</th>
+                </tr>
+                {% for row in ml_results %}
+                <tr>
+                    <td>{{ row.ticker }}</td>
+                    <td>
+                        {% if row.prediction is not none %}
+                            {{ row.prediction | round(6) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.error %}
+                            {{ row.error }}
+                        {% else %}
+                            OK
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% if ml_weighted_avg is not none %}
+                <h3>Weighted Average Volatility: {{ ml_weighted_avg | round(6) }}</h3>
+            {% endif %}
+        {% elif mode == "var" %}
+            <div class="metric">
+                <div class="metric-title">Annualized Volatility:</div>
+                <div>{{ volatility | round(4) }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> Volatility measures the degree of variation in your portfolio's returns. Higher volatility means more risk and larger swings in value.
+                </div>
             </div>
-        </div>
-    {% else %}
-        <div class="metric">
-            <div class="metric-title">Annualized Volatility:</div>
-            <div>{{ volatility | round(4) }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> Volatility measures the degree of variation in your portfolio's returns. Higher volatility means more risk and larger swings in value.
+            <div class="metric">
+                <div class="metric-title">Historical Value at Risk (VaR):</div>
+                <div>{{ historical_var | round(4) }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> Historical VaR estimates the maximum expected loss over a given period at a certain confidence level, based on actual historical returns.
+                </div>
             </div>
-        </div>
-        <div class="metric">
-            <div class="metric-title">Historical Value at Risk (VaR):</div>
-            <div>{{ historical_var | round(4) }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> Historical VaR estimates the maximum expected loss over a given period at a certain confidence level, based on actual historical returns.
+            <div class="metric">
+                <div class="metric-title">Parametric Value at Risk (VaR):</div>
+                <div>{{ parametric_var | round(4) }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> Parametric VaR assumes returns are normally distributed and uses mean and standard deviation to estimate risk.
+                </div>
             </div>
-        </div>
-        <div class="metric">
-            <div class="metric-title">Parametric Value at Risk (VaR):</div>
-            <div>{{ parametric_var | round(4) }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> Parametric VaR assumes returns are normally distributed and uses mean and standard deviation to estimate risk.
+            <div class="metric">
+                <div class="metric-title">Monte Carlo Value at Risk (VaR):</div>
+                <div>{{ monte_carlo_var | round(4) }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> Monte Carlo VaR simulates thousands of possible return scenarios to estimate the risk of extreme losses.
+                </div>
             </div>
-        </div>
-        <div class="metric">
-            <div class="metric-title">Monte Carlo Value at Risk (VaR):</div>
-            <div>{{ monte_carlo_var | round(4) }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> Monte Carlo VaR simulates thousands of possible return scenarios to estimate the risk of extreme losses.
+            <div class="metric">
+                <div class="metric-title">Sharpe Ratio:</div>
+                <div>{{ sharpe_ratio if sharpe_ratio != 'N/A' else 'N/A' }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> The Sharpe Ratio measures risk-adjusted return. Higher values indicate better risk-adjusted performance.
+                </div>
             </div>
-        </div>
-        <div class="metric">
-            <div class="metric-title">Sharpe Ratio:</div>
-            <div>{{ sharpe_ratio if sharpe_ratio != 'N/A' else 'N/A' }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> The Sharpe Ratio measures risk-adjusted return. Higher values indicate better risk-adjusted performance.
+            <div class="metric">
+                <div class="metric-title">Max Drawdown:</div>
+                <div>{{ max_drawdown if max_drawdown != 'N/A' else 'N/A' }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> Max Drawdown is the largest observed loss from a peak to a trough, showing the worst-case scenario for your portfolio.
+                </div>
             </div>
-        </div>
-        <div class="metric">
-            <div class="metric-title">Max Drawdown:</div>
-            <div>{{ max_drawdown if max_drawdown != 'N/A' else 'N/A' }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> Max Drawdown is the largest observed loss from a peak to a trough, showing the worst-case scenario for your portfolio.
+            <div class="metric">
+                <div class="metric-title">Sortino Ratio:</div>
+                <div>{{ sortino_ratio if sortino_ratio != 'N/A' else 'N/A' }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> The Sortino Ratio is similar to Sharpe but only penalizes downside volatility, giving a better sense of negative risk.
+                </div>
             </div>
-        </div>
-        <div class="metric">
-            <div class="metric-title">Sortino Ratio:</div>
-            <div>{{ sortino_ratio if sortino_ratio != 'N/A' else 'N/A' }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> The Sortino Ratio is similar to Sharpe but only penalizes downside volatility, giving a better sense of negative risk.
+            <div class="metric">
+                <div class="metric-title">Beta vs. S&P 500:</div>
+                <div>{{ beta if beta != 'N/A' else 'N/A' }}</div>
+                <div class="explanation">
+                    <strong>What is this?</strong> Beta measures your portfolio's sensitivity to market movements. A beta of 1 means your portfolio moves with the market; less than 1 means less volatile.
+                </div>
             </div>
-        </div>
-        <div class="metric">
-            <div class="metric-title">Beta vs. S&P 500:</div>
-            <div>{{ beta if beta != 'N/A' else 'N/A' }}</div>
-            <div class="explanation">
-                <strong>What is this?</strong> Beta measures your portfolio's sensitivity to market movements. A beta of 1 means your portfolio moves with the market; less than 1 means less volatile.
+            <div class="plot">
+                <div class="metric-title">Cumulative Returns:</div>
+                <img src="{{ url_for('static', filename='graphs/cumulative_returns.png') }}" alt="Cumulative Returns Plot" width="600">
+                <div class="explanation">
+                    This plot shows how your portfolio would have grown over time, assuming all returns were reinvested.
+                </div>
             </div>
-        </div>
-        <div class="plot">
-            <div class="metric-title">Cumulative Returns:</div>
-            <img src="{{ url_for('static', filename='graphs/cumulative_returns.png') }}" alt="Cumulative Returns Plot" width="600">
-            <div class="explanation">
-                This plot shows how your portfolio would have grown over time, assuming all returns were reinvested.
+            <div class="plot">
+                <div class="metric-title">Return Distribution:</div>
+                <img src="{{ url_for('static', filename='graphs/return_histogram.png') }}" alt="Return Histogram" width="600">
+                <div class="explanation">
+                    This histogram shows the frequency of different daily returns for your portfolio, helping you visualize risk and skew.
+                </div>
             </div>
-        </div>
-        <div class="plot">
-            <div class="metric-title">Return Distribution:</div>
-            <img src="{{ url_for('static', filename='graphs/return_histogram.png') }}" alt="Return Histogram" width="600">
-            <div class="explanation">
-                This histogram shows the frequency of different daily returns for your portfolio, helping you visualize risk and skew.
+            <div class="plot">
+                <div class="metric-title">Monte Carlo Simulation:</div>
+                <img src="{{ url_for('static', filename='graphs/monte_carlo.png') }}" alt="Monte Carlo Simulation" width="600">
+                <div class="explanation">
+                    This plot displays simulated future paths of your portfolio value, illustrating the range of possible outcomes.
+                </div>
             </div>
-        </div>
-        <div class="plot">
-            <div class="metric-title">Monte Carlo Simulation:</div>
-            <img src="{{ url_for('static', filename='graphs/monte_carlo.png') }}" alt="Monte Carlo Simulation" width="600">
-            <div class="explanation">
-                This plot displays simulated future paths of your portfolio value, illustrating the range of possible outcomes.
-            </div>
-        </div>
-    {% endif %}
+        {% endif %}
 </body>
 </html>

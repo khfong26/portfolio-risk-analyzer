@@ -96,26 +96,16 @@
             </div>
         </div>
 
-        <!-- ML Prediction Section -->
+                <!-- ML Prediction Section -->
         <div id="ml-section" style="display:none;">
             <div class="form-section">
-                <label>Ticker: <input type="text" name="tickers[]" required></label>
+                <label>Tickers (comma separated): <input type="text" name="tickers[]" placeholder="e.g. AAPL, MSFT, GOOGL" required></label>
             </div>
             <div class="form-section">
-                <!-- Feature inputs -->
-                <div class="feature-input"><label>Return 21d: <input type="number" step="any" name="return_21d" required></label></div>
-                <div class="feature-input"><label>Return 5d: <input type="number" step="any" name="return_5d" required></label></div>
-                <div class="feature-input"><label>Return 1d: <input type="number" step="any" name="return_1d" required></label></div>
-                <div class="feature-input"><label>RSI 14: <input type="number" step="any" name="rsi_14" required></label></div>
-                <div class="feature-input"><label>Volume Avg 21d: <input type="number" step="any" name="volume_avg_21d" required></label></div>
-                <div class="feature-input"><label>MACD Hist: <input type="number" step="any" name="macd_hist" required></label></div>
-                <div class="feature-input"><label>MACD Signal: <input type="number" step="any" name="macd_signal" required></label></div>
-                <div class="feature-input"><label>Volume Avg 10d: <input type="number" step="any" name="volume_avg_10d" required></label></div>
-                <div class="feature-input"><label>Momentum 10d: <input type="number" step="any" name="momentum_10d" required></label></div>
-                <div class="feature-input"><label>MACD: <input type="number" step="any" name="macd" required></label></div>
-                <div class="feature-input"><label>MA 50: <input type="number" step="any" name="ma_50" required></label></div>
-                <div class="feature-input"><label>Momentum 21d: <input type="number" step="any" name="momentum_21d" required></label></div>
-                <div class="feature-input"><label>MA 20: <input type="number" step="any" name="ma_20" required></label></div>
+                <label>Weights (comma separated, optional): <input type="text" name="weights[]" placeholder="e.g. 0.5, 0.3, 0.2"></label>
+            </div>
+            <div class="form-section">
+                <small>All features will be computed automatically from recent price data.</small>
             </div>
         </div>
 

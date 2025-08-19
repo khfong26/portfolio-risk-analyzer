@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 from datetime import datetime
 from risk_metrics import load_valid_tickers, run_portfolio_analysis_web
-from ml.pipeline import predict
+from ml.pipeline import predict_portfolio as predict
 
 app = Flask(__name__)
 
@@ -22,8 +22,25 @@ def index():
 
     if request.method == "POST":
         mode = request.form.get("mode")
-        tickers = request.form.getlist("tickers[]")
-        tickers = [t.upper() for t in tickers]
+        tickers = []
+        weights = None
+
+        if mode == "ml":
+            # ML mode: get comma-separated tickers and weights
+            tickers_str = request.form.get("tickers[]", "")
+            tickers = [t.strip().upper() for t in tickers_str.split(",") if t.strip()]
+            weights_str = request.form.get("weights[]", "")
+            weights = [float(w.strip()) for w in weights_str.split(",") if w.strip()] if weights_str else None
+        elif mode == "var":
+            # VaR mode: get tickers and weights from repeated fields
+            tickers = request.form.getlist("tickers[]")
+            tickers = [t.strip().upper() for t in tickers if t.strip()]
+            weights = request.form.getlist("weights[]")
+            try:
+                weights = [float(w) for w in weights]
+            except ValueError:
+                error = "All weights must be numbers."
+                return render_template("index.html", error=error)
 
         # Validate tickers
         valid_tickers = set(load_valid_tickers())
@@ -33,15 +50,8 @@ def index():
 
         if mode == "var":
             # VaR calculation mode
-            weights = request.form.getlist("weights[]")
             start_date = request.form.get("start_date")
             end_date = request.form.get("end_date")
-
-            try:
-                weights = [float(w) for w in weights]
-            except ValueError:
-                error = "All weights must be numbers."
-                return render_template("index.html", error=error)
 
             if not weights or len(tickers) != len(weights):
                 error = "Please provide the same number of tickers and weights."
@@ -76,30 +86,9 @@ def index():
             )
 
         elif mode == "ml":
-            # ML prediction mode (single ticker only)
-            if len(tickers) != 1:
-                error = "Please enter exactly one ticker for volatility prediction."
-                return render_template("index.html", error=error)
-
-            # Collect all required features
-            feature_names = [
-                'return_21d', 'return_5d', 'return_1d', 'rsi_14', 'volume_avg_21d',
-                'macd_hist', 'macd_signal', 'volume_avg_10d', 'momentum_10d', 'macd',
-                'ma_50', 'momentum_21d', 'ma_20'
-            ]
-            input_dict = {"ticker": tickers[0]}
+            # ML prediction mode (multiple tickers)
             try:
-                for fname in feature_names:
-                    val = request.form.get(fname)
-                    if val is None or val == "":
-                        raise ValueError(f"Missing value for {fname}")
-                    input_dict[fname] = float(val)
-            except Exception as e:
-                error = f"Invalid or missing input: {e}"
-                return render_template("index.html", error=error)
-
-            try:
-                prediction = predict(input_dict)
+                results, weighted_avg = predict(tickers, weights if weights and len(weights) == len(tickers) else None)
             except Exception as e:
                 error = f"Prediction error: {e}"
                 return render_template("index.html", error=error)
@@ -108,7 +97,8 @@ def index():
                 "results.html",
                 error=error,
                 mode="ml",
-                prediction=prediction
+                ml_results=results,
+                ml_weighted_avg=weighted_avg
             )
 
     # GET request: show the input form
