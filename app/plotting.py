@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # Add this at the top of plotting.py
+matplotlib.use('Agg')  
 
 
 def plot_cumulative_returns(portfolio_df, save_path=None):

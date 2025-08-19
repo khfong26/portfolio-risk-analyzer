@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 from datetime import datetime
-from risk_metrics import load_valid_tickers, run_portfolio_analysis_web
-from ml.pipeline import predict_portfolio as predict
+from app.risk_metrics import load_valid_tickers, run_portfolio_analysis_web
+from app.ml.pipeline import predict_portfolio as predict
 
 app = Flask(__name__)
 
