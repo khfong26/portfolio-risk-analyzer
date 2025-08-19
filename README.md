@@ -88,7 +88,7 @@ portfolio-risk-analyzer/
 
 | Home Page | Results Page |
 |-----------|--------------|
-| ![Home](screenshots/front_page.png) | ![Results](screenshots/results_page_1.png) |
+| ![Home](screenshots/home_page.png) | ![Results](screenshots/ml_results.png) |
 
 ---
 
