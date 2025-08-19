@@ -3,113 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <title>Portfolio Risk Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .error { color: red; margin-bottom: 10px; }
+        .form-section { margin-bottom: 20px; }
         .ticker-weight-group { margin-bottom: 8px; }
         .instructions { background: #f0f0f0; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .form-section { margin-bottom: 20px; }
-        .btn { padding: 6px 12px; border: none; border-radius: 3px; background: #007bff; color: white; cursor: pointer; }
-        .btn-danger { background: #dc3545; }
-        .btn-success { background: #28a745; }
         .feature-input { margin-bottom: 6px; }
+        .spinner-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(255,255,255,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
     </style>
-        <script>
-        function showSection() {
-            var mode = document.querySelector('input[name="mode"]:checked').value;
-            var varSection = document.getElementById('var-section');
-            var mlSection = document.getElementById('ml-section');
-            varSection.style.display = (mode === 'var') ? 'block' : 'none';
-            mlSection.style.display = (mode === 'ml') ? 'block' : 'none';
-    
-            // Enable/disable all inputs in each section
-            Array.from(varSection.querySelectorAll('input')).forEach(function(input) {
-                input.disabled = (mode !== 'var');
-            });
-            Array.from(mlSection.querySelectorAll('input')).forEach(function(input) {
-                input.disabled = (mode !== 'ml');
-            });
-        }
-        function addTickerInput() {
-            const container = document.getElementById('tickers-container');
-            const div = document.createElement('div');
-            div.className = 'ticker-weight-group';
-            div.innerHTML = `
-                <input type="text" name="tickers[]" placeholder="Ticker (e.g., AAPL)" required>
-                <input type="number" name="weights[]" placeholder="Weight (e.g., 0.5)" min="0" max="1" step="0.01" required>
-                <button type="button" class="btn btn-danger" onclick="removeTicker(this)">Remove</button>
-            `;
-            container.appendChild(div);
-            updateRemoveButtons();
-            showSection(); // Ensure new inputs are enabled/disabled correctly
-        }
-        function removeTicker(btn) {
-            btn.parentElement.remove();
-            updateRemoveButtons();
-        }
-        function updateRemoveButtons() {
-            const groups = document.querySelectorAll('.ticker-weight-group');
-            groups.forEach((group, idx) => {
-                const btn = group.querySelector('.btn-danger');
-                btn.style.display = (groups.length > 1) ? 'inline-block' : 'none';
-            });
-        }
-        window.onload = function() {
-            showSection();
-            updateRemoveButtons();
-        }
-    </script>
 </head>
-<body>
-    <h1>Portfolio Risk Analyzer</h1>
-    <div class="instructions">
-        <strong>Instructions:</strong>
-        <ul>
-            <li>Choose your analysis type below.</li>
-            <li>For VaR, enter one or more tickers and weights (weights must sum to 1).</li>
-            <li>For 10-Day Volatility Prediction, enter a single ticker and all required features.</li>
-        </ul>
+<body class="bg-light">
+<div class="container py-4">
+    <h1 class="mb-4">Portfolio Risk Analyzer</h1>
+    <div class="alert alert-info">
+        <strong>What does this app do?</strong><br>
+        Enter S&P 500 tickers to analyze your portfolio's risk or predict the 10-day volatility of individual stocks using a machine learning model.
     </div>
     {% if error %}
-        <div class="error">{{ error }}</div>
+        <div class="alert alert-warning">{{ error }}</div>
     {% endif %}
 
-    <form method="POST">
+    <form method="POST" class="bg-white p-4 rounded shadow-sm" id="main-form">
         <div class="form-section">
-            <label><input type="radio" name="mode" value="var" checked onchange="showSection()"> VaR Calculations</label>
-            <label><input type="radio" name="mode" value="ml" onchange="showSection()"> 10-Day Volatility Prediction (ML Model)</label>
+            <label class="form-label me-3">
+                <input type="radio" name="mode" value="var" checked onchange="showSection()"> 
+                <span data-bs-toggle="tooltip" title="Calculate Value at Risk and other risk metrics for your portfolio.">VaR Calculations</span>
+            </label>
+            <label class="form-label">
+                <input type="radio" name="mode" value="ml" onchange="showSection()"> 
+                <span data-bs-toggle="tooltip" title="Predict the 10-day volatility for one or more stocks using a machine learning model.">10-Day Volatility Prediction (ML Model)</span>
+            </label>
         </div>
 
         <!-- VaR Section -->
         <div id="var-section">
             <div id="tickers-container" class="form-section">
-                <div class="ticker-weight-group">
-                    <input type="text" name="tickers[]" placeholder="Ticker (e.g., AAPL)" required>
-                    <input type="number" name="weights[]" placeholder="Weight (e.g., 0.5)" min="0" max="1" step="0.01" required>
-                    <button type="button" class="btn btn-danger" onclick="removeTicker(this)" style="display:none;">Remove</button>
+                <div class="row mb-2 ticker-weight-group">
+                    <div class="col">
+                        <input type="text" name="tickers[]" class="form-control" placeholder="Ticker (e.g., AAPL)" required data-bs-toggle="tooltip" title="Enter a valid S&P 500 ticker.">
+                    </div>
+                    <div class="col">
+                        <input type="number" name="weights[]" class="form-control" placeholder="Weight (e.g., 0.5)" min="0" max="1" step="0.01" required data-bs-toggle="tooltip" title="Portfolio weight for this ticker. All weights must sum to 1.">
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-danger" onclick="removeTicker(this)" style="display:none;">Remove</button>
+                    </div>
                 </div>
             </div>
-            <button type="button" class="btn" onclick="addTickerInput()">Add Ticker</button>
+            <button type="button" class="btn btn-secondary mb-3" onclick="addTickerInput()">Add Ticker</button>
             <div class="form-section">
-                <label>Start Date: <input type="date" name="start_date"></label>
-                <label>End Date: <input type="date" name="end_date"></label>
+                <label class="form-label">Start Date: 
+                    <input type="date" name="start_date" class="form-control d-inline w-auto" required max="{{ current_date }}">
+                </label>
+                <label class="form-label ms-3">End Date: 
+                    <input type="date" name="end_date" class="form-control d-inline w-auto" required max="{{ current_date }}">
+                </label>
+                <div class="form-text mb-2">
+                    Select a date range from the past. The risk metrics will be calculated based on this historical period.
+                </div>
             </div>
         </div>
 
-                <!-- ML Prediction Section -->
+        <!-- ML Prediction Section -->
         <div id="ml-section" style="display:none;">
             <div class="form-section">
-                <label>Tickers (comma separated): <input type="text" name="tickers[]" placeholder="e.g. AAPL, MSFT, GOOGL" required></label>
+                <label class="form-label">Tickers (comma separated): 
+                    <input type="text" name="tickers[]" class="form-control" placeholder="e.g. AAPL, MSFT, TSLA" required data-bs-toggle="tooltip" title="Enter one or more S&P 500 tickers, separated by commas.">
+                </label>
             </div>
             <div class="form-section">
-                <label>Weights (comma separated, optional): <input type="text" name="weights[]" placeholder="e.g. 0.5, 0.3, 0.2"></label>
+                <label class="form-label">Weights (comma separated, optional): 
+                    <input type="text" name="weights[]" class="form-control" placeholder="e.g. 0.5, 0.3, 0.2" data-bs-toggle="tooltip" title="Optional: Portfolio weights for each ticker. Must sum to 1 if provided.">
+                </label>
             </div>
-            <div class="form-section">
-                <small>All features will be computed automatically from recent price data.</small>
+            <div class="form-text mb-3">
+                All features are computed automatically from recent price data.
             </div>
         </div>
 
-        <button type="submit" class="btn btn-success">Submit</button>
+        <button type="submit" class="btn btn-primary">Analyze</button>
     </form>
+</div>
+
+<!-- Loading Spinner -->
+<div id="loading-spinner" class="spinner-overlay d-none">
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;"></div>
+        <div class="mt-3 fs-5">Loading, please wait...</div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showSection() {
+        var mode = document.querySelector('input[name="mode"]:checked').value;
+        var varSection = document.getElementById('var-section');
+        var mlSection = document.getElementById('ml-section');
+        varSection.style.display = (mode === 'var') ? 'block' : 'none';
+        mlSection.style.display = (mode === 'ml') ? 'block' : 'none';
+        // Enable/disable all inputs in each section
+        Array.from(varSection.querySelectorAll('input')).forEach(function(input) {
+            input.disabled = (mode !== 'var');
+        });
+        Array.from(mlSection.querySelectorAll('input')).forEach(function(input) {
+            input.disabled = (mode !== 'ml');
+        });
+    }
+    function addTickerInput() {
+        const container = document.getElementById('tickers-container');
+        const div = document.createElement('div');
+        div.className = 'row mb-2 ticker-weight-group';
+        div.innerHTML = `
+            <div class="col">
+                <input type="text" name="tickers[]" class="form-control" placeholder="Ticker (e.g., AAPL)" required data-bs-toggle="tooltip" title="Enter a valid S&P 500 ticker.">
+            </div>
+            <div class="col">
+                <input type="number" name="weights[]" class="form-control" placeholder="Weight (e.g., 0.5)" min="0" max="1" step="0.01" required data-bs-toggle="tooltip" title="Portfolio weight for this ticker. All weights must sum to 1.">
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger" onclick="removeTicker(this)">Remove</button>
+            </div>
+        `;
+        container.appendChild(div);
+        updateRemoveButtons();
+        showSection();
+        enableTooltips();
+    }
+    function removeTicker(btn) {
+        btn.closest('.ticker-weight-group').remove();
+        updateRemoveButtons();
+    }
+    function updateRemoveButtons() {
+        const groups = document.querySelectorAll('.ticker-weight-group');
+        groups.forEach((group, idx) => {
+            const btn = group.querySelector('.btn-danger');
+            btn.style.display = (groups.length > 1) ? 'inline-block' : 'none';
+        });
+    }
+    function enableTooltips() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    window.onload = function() {
+        showSection();
+        updateRemoveButtons();
+        enableTooltips();
+        // Loading spinner
+        document.getElementById('main-form').addEventListener('submit', function() {
+            document.getElementById('loading-spinner').classList.remove('d-none');
+        });
+    }
+</script>
 </body>
 </html>

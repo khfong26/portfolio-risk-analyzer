@@ -19,6 +19,7 @@ def index():
         "sortino_ratio": "N/A",
         "beta": "N/A",
     }
+    current_date = datetime.today().strftime('%Y-%m-%d')
 
     if request.method == "POST":
         mode = request.form.get("mode")
@@ -40,13 +41,13 @@ def index():
                 weights = [float(w) for w in weights]
             except ValueError:
                 error = "All weights must be numbers."
-                return render_template("index.html", error=error)
+                return render_template("index.html", error=error, current_date=current_date)
 
         # Validate tickers
         valid_tickers = set(load_valid_tickers())
         if not tickers or not all(t in valid_tickers for t in tickers):
             error = "Please provide valid S&P 500 tickers."
-            return render_template("index.html", error=error)
+            return render_template("index.html", error=error, current_date=current_date)
 
         if mode == "var":
             # VaR calculation mode
@@ -55,18 +56,18 @@ def index():
 
             if not weights or len(tickers) != len(weights):
                 error = "Please provide the same number of tickers and weights."
-                return render_template("index.html", error=error)
+                return render_template("index.html", error=error, current_date=current_date)
 
             if not abs(sum(weights) - 1.0) < 1e-6:
                 error = "Weights must sum to 1."
-                return render_template("index.html", error=error)
+                return render_template("index.html", error=error, current_date=current_date)
 
             try:
                 datetime.strptime(start_date, "%Y-%m-%d")
                 datetime.strptime(end_date, "%Y-%m-%d")
             except Exception:
                 error = "Invalid date format."
-                return render_template("index.html", error=error)
+                return render_template("index.html", error=error, current_date=current_date)
 
             try:
                 result = run_portfolio_analysis_web(
@@ -82,27 +83,36 @@ def index():
                 "results.html",
                 error=error,
                 mode="var",
+                current_date=current_date,
                 **metrics
             )
 
         elif mode == "ml":
             # ML prediction mode (multiple tickers)
+            if weights:
+                if len(weights) != len(tickers):
+                    error = "Please provide the same number of weights as tickers."
+                    return render_template("index.html", error=error, current_date=current_date)
+                if not abs(sum(weights) - 1.0) < 1e-6:
+                    error = "Weights must sum to 1."
+                    return render_template("index.html", error=error, current_date=current_date)
             try:
                 results, weighted_avg = predict(tickers, weights if weights and len(weights) == len(tickers) else None)
             except Exception as e:
                 error = f"Prediction error: {e}"
-                return render_template("index.html", error=error)
+                return render_template("index.html", error=error, current_date=current_date)
 
             return render_template(
                 "results.html",
                 error=error,
                 mode="ml",
                 ml_results=results,
-                ml_weighted_avg=weighted_avg
+                ml_weighted_avg=weighted_avg,
+                current_date=current_date
             )
 
     # GET request: show the input form
-    return render_template("index.html", error=error)
+    return render_template("index.html", error=error, current_date=current_date)
 
 if __name__ == "__main__":
     app.run(debug=True)
