@@ -1,9 +1,12 @@
 import joblib
 import pandas as pd
+import os
 
-# Load model and label encoder
-model = joblib.load("xgb_model_13_features.pkl")
-le = joblib.load("label_encoder_xgb.pkl")
+BASE_DIR = os.path.dirname(__file__)
+
+model = joblib.load(os.path.join(BASE_DIR, "xgb_model_13_features.pkl"))
+le = joblib.load(os.path.join(BASE_DIR, "label_encoder_xgb.pkl"))
+
 
 # Must match training!
 top_features = [

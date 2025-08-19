@@ -12,48 +12,24 @@
         .btn { padding: 6px 12px; border: none; border-radius: 3px; background: #007bff; color: white; cursor: pointer; }
         .btn-danger { background: #dc3545; }
         .btn-success { background: #28a745; }
+        .feature-input { margin-bottom: 6px; }
     </style>
-</head>
-<body>
-    <h1>Portfolio Risk Analyzer</h1>
-
-    <!-- Instructions for the user -->
-    <div class="instructions">
-        <strong>Instructions:</strong>
-        <ul>
-            <li>Enter one or more S&amp;P 500 tickers and their weights (weights must sum to 1).</li>
-            <li>Use the "Add Ticker" button to add more assets to your portfolio.</li>
-            <li>Select a start and end date for your analysis.</li>
-        </ul>
-    </div>
-
-    <!-- Error message display -->
-    {% if error %}
-        <div class="error">{{ error }}</div>
-    {% endif %}
-
-    <!-- Portfolio input form -->
-    <form method="POST">
-        <div id="tickers-container" class="form-section">
-            <!-- Initial ticker/weight input -->
-            <div class="ticker-weight-group">
-                <input type="text" name="tickers[]" placeholder="Ticker (e.g., AAPL)" required>
-                <input type="number" name="weights[]" placeholder="Weight (e.g., 0.5)" min="0" max="1" step="0.01" required>
-                <button type="button" class="btn btn-danger" onclick="removeTicker(this)" style="display:none;">Remove</button>
-            </div>
-        </div>
-        <button type="button" class="btn" onclick="addTickerInput()">Add Ticker</button>
-
-        <div class="form-section">
-            <label>Start Date: <input type="date" name="start_date" required></label>
-            <label>End Date: <input type="date" name="end_date" required></label>
-        </div>
-
-        <button type="submit" class="btn btn-success">Analyze Portfolio</button>
-    </form>
-
-    <!-- JavaScript for dynamic ticker/weight fields -->
-    <script>
+        <script>
+        function showSection() {
+            var mode = document.querySelector('input[name="mode"]:checked').value;
+            var varSection = document.getElementById('var-section');
+            var mlSection = document.getElementById('ml-section');
+            varSection.style.display = (mode === 'var') ? 'block' : 'none';
+            mlSection.style.display = (mode === 'ml') ? 'block' : 'none';
+    
+            // Enable/disable all inputs in each section
+            Array.from(varSection.querySelectorAll('input')).forEach(function(input) {
+                input.disabled = (mode !== 'var');
+            });
+            Array.from(mlSection.querySelectorAll('input')).forEach(function(input) {
+                input.disabled = (mode !== 'ml');
+            });
+        }
         function addTickerInput() {
             const container = document.getElementById('tickers-container');
             const div = document.createElement('div');
@@ -64,15 +40,13 @@
                 <button type="button" class="btn btn-danger" onclick="removeTicker(this)">Remove</button>
             `;
             container.appendChild(div);
-            // Show remove button for all but the first group
             updateRemoveButtons();
+            showSection(); // Ensure new inputs are enabled/disabled correctly
         }
-
         function removeTicker(btn) {
             btn.parentElement.remove();
             updateRemoveButtons();
         }
-
         function updateRemoveButtons() {
             const groups = document.querySelectorAll('.ticker-weight-group');
             groups.forEach((group, idx) => {
@@ -80,6 +54,72 @@
                 btn.style.display = (groups.length > 1) ? 'inline-block' : 'none';
             });
         }
+        window.onload = function() {
+            showSection();
+            updateRemoveButtons();
+        }
     </script>
+</head>
+<body>
+    <h1>Portfolio Risk Analyzer</h1>
+    <div class="instructions">
+        <strong>Instructions:</strong>
+        <ul>
+            <li>Choose your analysis type below.</li>
+            <li>For VaR, enter one or more tickers and weights (weights must sum to 1).</li>
+            <li>For 10-Day Volatility Prediction, enter a single ticker and all required features.</li>
+        </ul>
+    </div>
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        <div class="form-section">
+            <label><input type="radio" name="mode" value="var" checked onchange="showSection()"> VaR Calculations</label>
+            <label><input type="radio" name="mode" value="ml" onchange="showSection()"> 10-Day Volatility Prediction (ML Model)</label>
+        </div>
+
+        <!-- VaR Section -->
+        <div id="var-section">
+            <div id="tickers-container" class="form-section">
+                <div class="ticker-weight-group">
+                    <input type="text" name="tickers[]" placeholder="Ticker (e.g., AAPL)" required>
+                    <input type="number" name="weights[]" placeholder="Weight (e.g., 0.5)" min="0" max="1" step="0.01" required>
+                    <button type="button" class="btn btn-danger" onclick="removeTicker(this)" style="display:none;">Remove</button>
+                </div>
+            </div>
+            <button type="button" class="btn" onclick="addTickerInput()">Add Ticker</button>
+            <div class="form-section">
+                <label>Start Date: <input type="date" name="start_date"></label>
+                <label>End Date: <input type="date" name="end_date"></label>
+            </div>
+        </div>
+
+        <!-- ML Prediction Section -->
+        <div id="ml-section" style="display:none;">
+            <div class="form-section">
+                <label>Ticker: <input type="text" name="tickers[]" required></label>
+            </div>
+            <div class="form-section">
+                <!-- Feature inputs -->
+                <div class="feature-input"><label>Return 21d: <input type="number" step="any" name="return_21d" required></label></div>
+                <div class="feature-input"><label>Return 5d: <input type="number" step="any" name="return_5d" required></label></div>
+                <div class="feature-input"><label>Return 1d: <input type="number" step="any" name="return_1d" required></label></div>
+                <div class="feature-input"><label>RSI 14: <input type="number" step="any" name="rsi_14" required></label></div>
+                <div class="feature-input"><label>Volume Avg 21d: <input type="number" step="any" name="volume_avg_21d" required></label></div>
+                <div class="feature-input"><label>MACD Hist: <input type="number" step="any" name="macd_hist" required></label></div>
+                <div class="feature-input"><label>MACD Signal: <input type="number" step="any" name="macd_signal" required></label></div>
+                <div class="feature-input"><label>Volume Avg 10d: <input type="number" step="any" name="volume_avg_10d" required></label></div>
+                <div class="feature-input"><label>Momentum 10d: <input type="number" step="any" name="momentum_10d" required></label></div>
+                <div class="feature-input"><label>MACD: <input type="number" step="any" name="macd" required></label></div>
+                <div class="feature-input"><label>MA 50: <input type="number" step="any" name="ma_50" required></label></div>
+                <div class="feature-input"><label>Momentum 21d: <input type="number" step="any" name="momentum_21d" required></label></div>
+                <div class="feature-input"><label>MA 20: <input type="number" step="any" name="ma_20" required></label></div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Submit</button>
+    </form>
 </body>
 </html>
