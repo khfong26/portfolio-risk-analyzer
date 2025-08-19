@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from risk_metrics import load_valid_tickers, run_portfolio_analysis_web
+from ml.pipeline import predict  
 
 app = Flask(__name__)
 
