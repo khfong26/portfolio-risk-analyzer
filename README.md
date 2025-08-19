@@ -1,62 +1,54 @@
 # 📊 Portfolio Risk Analyzer
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.0+-lightgrey.svg)](https://flask.palletsprojects.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
-A web-based tool for analyzing portfolio risk, visualizing historical performance, and running simulations such as Monte Carlo forecasting.  
-Built with **Flask**, **Pandas**, **Matplotlib**, and **yfinance**.
+A web-based tool for analyzing portfolio risk, visualizing historical performance, and predicting short-term volatility using machine learning.
 
 ---
 
 ## 🚀 Features
 
-- Enter a list of S&P 500 tickers and their weights for analysis
-- Fetch historical price data via `yfinance`
-- Calculate:
-  - Daily returns
-  - Cumulative returns
-  - Portfolio volatility
-  - Value at Risk (historical, parametric, Monte Carlo)
-- Generate visualizations:
-  - Cumulative returns over time
-  - Return distribution histogram
-  - Monte Carlo simulation outcomes
-- Web-based frontend for easy interaction and visualization
-- Robust input validation and error handling
+- **Portfolio Risk Analysis:**  
+  Enter S&P 500 tickers and weights to analyze historical volatility, Value at Risk (VaR), Sharpe/Sortino ratios, drawdown, and more.
+- **ML Volatility Prediction:**  
+  Predict the next 10-day volatility for one or more stocks using a trained XGBoost model.
+- **Interactive Web UI:**  
+  Clean, Bootstrap-styled interface with tooltips, error handling, and visualizations.
+- **Visualizations:**  
+  Cumulative returns, return distributions, and Monte Carlo simulation plots.
+- **Robust Input Validation:**  
+  Friendly error messages and guidance throughout.
 
 ---
 
-## 📂 Project Structure
+## 🏗️ Project Structure
 
 ```
 portfolio-risk-analyzer/
 │
-├── app/                  # Flask app & backend logic
-│   ├── static/           # Generated graphs
-│   ├── templates/        # HTML templates
-│   ├── plotting.py       # Graph creation functions
-│   ├── risk_metrics.py   # Core portfolio analysis
-│   └── app.py            # Flask app entry point
+├── app/
+│   ├── app.py                # Flask app entry point
+│   ├── ml/                   # ML pipeline and model files
+│   ├── plotting.py           # Graph creation functions
+│   ├── risk_metrics.py       # Core portfolio analysis
+│   ├── static/               # Generated graphs
+│   └── templates/            # HTML templates
 │
-├── tests/                # Unit tests
-├── requirements.txt      # Python dependencies
-├── README.md             # Project documentation
-├── LICENSE               # MIT license
-└── screenshots/          # Example screenshots 
+├── requirements.txt
+├── Procfile
+├── README.md
+└── ...
 ```
 
 ---
 
-## ⚙️ Installation & Usage
+## ⚙️ Setup & Usage
 
 1. **Clone the repository**
     ```sh
-    git clone https://github.com/khfong26/portfolio-risk-analyzer.git
+    git clone https://github.com/yourusername/portfolio-risk-analyzer.git
     cd portfolio-risk-analyzer
     ```
 
-2. **Create and activate a virtual environment** (recommended)
+2. **Create and activate a virtual environment**
     ```sh
     python -m venv venv
     # On Windows:
@@ -70,31 +62,45 @@ portfolio-risk-analyzer/
     pip install -r requirements.txt
     ```
 
-4. **Run the app**
+4. **Run locally**
     ```sh
     python app/app.py
     ```
-    Then open your browser and go to:  
-    [http://127.0.0.1:5000](http://127.0.0.1:5000)
+    Then open your browser to [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ---
 
-## 🖼 Example Output
+## ☁️ Deploying to Render/Heroku
 
-| Home Page (`front_page.png`) | Results Page (Top) (`results_page_1.png`) | Results Page (Bottom) (`results_page_2.png`) |
-|-----------------------------|-------------------------------------------|----------------------------------------------|
-| ![Home Page](screenshots/front_page.png) | ![Results Page Top](screenshots/results_page_1.png) | ![Results Page Bottom](screenshots/results_page_2.png) |
+- Make sure you have a `Procfile` with:  
+  ```
+  web: gunicorn app.app:app
+  ```
+- Push your code to GitHub.
+- Create a new web service on [Render](https://render.com/) or [Heroku](https://heroku.com/).
+- Set the build command: `pip install -r requirements.txt`
+- Set the start command: `gunicorn app.app:app`
+- That’s it!
+
+---
+
+## 🖼 Example Screenshots
+
+| Home Page | Results Page |
+|-----------|--------------|
+| ![Home](screenshots/front_page.png) | ![Results](screenshots/results_page_1.png) |
+
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License
 
 ---
 
 ## 💡 Future Improvements
 
 - Enhanced frontend styling
-- More detailed risk metrics (e.g., max drawdown, Sharpe ratio)
-- Ability to save & load portfolio configurations
-- Support for different data sources beyond Yahoo Finance
+- More risk metrics (e.g., expected shortfall)
+- Save/load portfolio configs
+- User authentication (optional)

@@ -1,4 +1,5 @@
 flask
+gunicorn
 pandas
 numpy
 yfinance
@@ -8,6 +9,5 @@ scipy
 requests
 pandas_market_calendars
 pytest
-xgboost # optional, if using xgboost
-lightgbm # optional, if using lightgbm
+xgboost
 scikit-learn

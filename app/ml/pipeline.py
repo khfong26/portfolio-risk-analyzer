@@ -6,8 +6,11 @@ import yfinance as yf
 
 BASE_DIR = os.path.dirname(__file__)
 
-model = joblib.load(os.path.join(BASE_DIR, "xgb_model_13_features.pkl"))
-le = joblib.load(os.path.join(BASE_DIR, "label_encoder_xgb.pkl"))
+MODEL_PATH = os.path.join(BASE_DIR, "xgb_model_13_features.pkl")
+ENCODER_PATH = os.path.join(BASE_DIR, "label_encoder_xgb.pkl")
+
+model = joblib.load(MODEL_PATH)
+le = joblib.load(ENCODER_PATH)
 
 top_features = [
     'return_21d', 'return_5d', 'return_1d', 'rsi_14', 'volume_avg_21d',
