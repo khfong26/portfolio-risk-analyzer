@@ -1,6 +1,7 @@
 # 📊 Portfolio Risk Analyzer
 
-A web-based tool for analyzing portfolio risk, visualizing historical performance, and predicting short-term volatility using machine learning.
+A web-based tool for analyzing portfolio risk, visualizing historical performance, and predicting short-term volatility using machine learning.  
+👉 Live Demo: [Portfolio Risk Analyzer on Render](https://portfolio-risk-analyzer-f7of.onrender.com)
 
 ---
 
@@ -21,22 +22,32 @@ A web-based tool for analyzing portfolio risk, visualizing historical performanc
 
 ## 🏗️ Project Structure
 
-```
 portfolio-risk-analyzer/
 │
 ├── app/
-│   ├── app.py                # Flask app entry point
-│   ├── ml/                   # ML pipeline and model files
-│   ├── plotting.py           # Graph creation functions
-│   ├── risk_metrics.py       # Core portfolio analysis
-│   ├── static/               # Generated graphs
-│   └── templates/            # HTML templates
+│ ├── init.py # Package init (exposes app)
+│ ├── app.py # Flask app entry point
+│ ├── ml/ # ML pipeline and model files
+│ ├── plotting.py # Graph creation functions
+│ ├── risk_metrics.py # Core portfolio analysis
+│ ├── static/ # Generated graphs
+│ └── templates/ # HTML templates
 │
 ├── requirements.txt
 ├── Procfile
 ├── README.md
 └── ...
-```
+
+
+---
+
+## 🖥️ Tech Stack
+
+- **Backend:** Python, Flask  
+- **Machine Learning:** XGBoost, scikit-learn, pandas, numpy  
+- **Visualization:** Matplotlib, Seaborn  
+- **Frontend:** HTML, Bootstrap, Jinja2 templates  
+- **Deployment:** Render  
 
 ---
 
@@ -66,21 +77,34 @@ portfolio-risk-analyzer/
     ```sh
     python app/app.py
     ```
-    Then open your browser to [http://127.0.0.1:5000](http://127.0.0.1:5000)
+    Then open your browser at [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ---
 
-## ☁️ Deploying to Render/Heroku
+## ☁️ Deployment (Render)
 
-- Make sure you have a `Procfile` with:  
+This app is live on [Render](https://render.com).  
+To deploy your own copy:
+
+1. Make sure you have a `Procfile` with:
+
+web: gunicorn app.app:app
+
+(`__init__.py` inside `app/` makes `app` directly importable.)
+
+2. Push your code to GitHub.
+
+3. On Render, create a **new Web Service**:
+- **Build command:**  
   ```
-  web: gunicorn app.app:app
+  pip install -r requirements.txt
   ```
-- Push your code to GitHub.
-- Create a new web service on [Render](https://render.com/) or [Heroku](https://heroku.com/).
-- Set the build command: `pip install -r requirements.txt`
-- Set the start command: `gunicorn app.app:app`
-- That’s it!
+- **Start command:**  
+  ```
+  gunicorn app:app
+  ```
+
+4. Deploy — Render will handle the rest.
 
 ---
 
