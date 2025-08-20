@@ -101,7 +101,7 @@ web: gunicorn app.app:app
   ```
 - **Start command:**  
   ```
-  gunicorn app:app
+  gunicorn app.app:app
   ```
 
 4. Deploy — Render will handle the rest.
