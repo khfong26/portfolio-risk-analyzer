@@ -1,9 +1,20 @@
 from flask import Flask, render_template, request
 from datetime import datetime
-from app.risk_metrics import load_valid_tickers, run_portfolio_analysis_web
-from app.ml.pipeline import predict_portfolio as predict
+import sys
+import os
+
+# Add the app directory to the Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from risk_metrics import load_valid_tickers, run_portfolio_analysis_web
+from ml.pipeline import predict_portfolio as predict
 
 app = Flask(__name__)
+
+@app.route("/quests")
+def quests():
+    """Quest Manager page"""
+    return render_template("quests.html")
 
 @app.route("/", methods=["GET", "POST"])
 def index():

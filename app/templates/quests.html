@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quest Manager</title>
+    <!-- Inline Bootstrap CSS (minimal) -->
+    <style>
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+        .py-4 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 1.5rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .me-2 { margin-right: 0.5rem; }
+        .ms-2 { margin-left: 0.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .w-100 { width: 100%; }
+        
+        .row { display: flex; flex-wrap: wrap; margin-left: -0.75rem; margin-right: -0.75rem; }
+        .col { flex: 1 0 0%; padding-left: 0.75rem; padding-right: 0.75rem; }
+        .col-md-2 { flex: 0 0 auto; width: 16.66666667%; padding-left: 0.75rem; padding-right: 0.75rem; }
+        .col-md-3 { flex: 0 0 auto; width: 25%; padding-left: 0.75rem; padding-right: 0.75rem; }
+        .col-md-4 { flex: 0 0 auto; width: 33.33333333%; padding-left: 0.75rem; padding-right: 0.75rem; }
+        .col-md-8 { flex: 0 0 auto; width: 66.66666667%; padding-left: 0.75rem; padding-right: 0.75rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        
+        .card { border: 1px solid rgba(0,0,0,.125); border-radius: 0.375rem; background-color: #fff; }
+        .card-header { padding: 0.75rem 1.25rem; background-color: rgba(0,0,0,.03); border-bottom: 1px solid rgba(0,0,0,.125); border-radius: 0.375rem 0.375rem 0 0; }
+        .card-body { padding: 1.25rem; }
+        
+        .form-control, .form-select { 
+            display: block; width: 100%; padding: 0.375rem 0.75rem; font-size: 1rem; 
+            border: 1px solid #ced4da; border-radius: 0.375rem; background-color: #fff;
+        }
+        .form-control-sm, .form-select-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+        
+        .btn { 
+            display: inline-block; padding: 0.375rem 0.75rem; font-size: 1rem; border-radius: 0.375rem; 
+            text-decoration: none; cursor: pointer; border: 1px solid transparent; text-align: center;
+        }
+        .btn-primary { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
+        .btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+        .btn-secondary { color: #fff; background-color: #6c757d; border-color: #6c757d; }
+        .btn-success { color: #fff; background-color: #198754; border-color: #198754; }
+        .btn-warning { color: #000; background-color: #ffc107; border-color: #ffc107; }
+        .btn-outline-primary { color: #0d6efd; border-color: #0d6efd; background-color: transparent; }
+        .btn-outline-primary:hover { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
+        .btn-outline-success { color: #198754; border-color: #198754; background-color: transparent; }
+        .btn-outline-success:hover { color: #fff; background-color: #198754; border-color: #198754; }
+        .btn-outline-danger { color: #dc3545; border-color: #dc3545; background-color: transparent; }
+        .btn-outline-danger:hover { color: #fff; background-color: #dc3545; border-color: #dc3545; }
+        .btn-outline-secondary { color: #6c757d; border-color: #6c757d; background-color: transparent; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+        .btn-group { display: inline-flex; }
+        .btn-group .btn { margin-left: -1px; }
+        .btn-group .btn:first-child { margin-left: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .btn-group .btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        
+        .badge { 
+            display: inline-block; padding: 0.35em 0.65em; font-size: 0.75em; 
+            font-weight: 700; border-radius: 0.375rem; 
+        }
+        .bg-secondary { background-color: #6c757d; color: #fff; }
+        .bg-info { background-color: #0dcaf0; color: #000; }
+        .bg-success { background-color: #198754; color: #fff; }
+        
+        .text-center { text-align: center; }
+        .text-muted { color: #6c757d; }
+        .bg-light { background-color: #f8f9fa; }
+        
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h5 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        
+        /* Custom styles */
+        .form-section { margin-bottom: 20px; }
+        .quest-card { 
+            margin-bottom: 15px; 
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff;
+            position: relative;
+        }
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .quest-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #495057;
+        }
+        .quest-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .quest-details {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .quest-xp {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .total-xp {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .completed-quest {
+            background-color: #f8f9fa;
+            border-color: #28a745;
+        }
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        /* Icons using Unicode symbols */
+        .icon-check::before { content: "✓"; }
+        .icon-square::before { content: "☐"; }
+        .icon-edit::before { content: "✎"; }
+        .icon-trash::before { content: "🗑"; }
+        .icon-arrow-left::before { content: "←"; }
+        .icon-undo::before { content: "↶"; }
+        .icon-save::before { content: "💾"; }
+        .icon-cancel::before { content: "✕"; }
+        .icon-journal::before { content: "📋"; }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">Quest Manager</h1>
+                <a href="/" class="btn btn-outline-secondary">
+                    <span class="icon-arrow-left"></span> Back to Portfolio
+                </a>
+            </div>
+            
+            <div class="total-xp" id="total-xp">
+                Total XP: <span id="xp-amount">0</span>
+            </div>
+            
+            <!-- Add New Quest Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Add New Quest</h5>
+                </div>
+                <div class="card-body">
+                    <form id="add-quest-form">
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <input type="text" id="quest-name" class="form-control" placeholder="Quest Name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="quest-type" class="form-select" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Main">Main Quest</option>
+                                    <option value="Side">Side Quest</option>
+                                    <option value="Daily">Daily Quest</option>
+                                    <option value="Weekly">Weekly Quest</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="quest-attribute" class="form-select" required>
+                                    <option value="">Select Attribute</option>
+                                    <option value="Strength">Strength</option>
+                                    <option value="Intelligence">Intelligence</option>
+                                    <option value="Dexterity">Dexterity</option>
+                                    <option value="Constitution">Constitution</option>
+                                    <option value="Wisdom">Wisdom</option>
+                                    <option value="Charisma">Charisma</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">Add Quest</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Quests List -->
+            <div id="quests-container">
+                <!-- Quest cards will be dynamically added here -->
+            </div>
+            
+            <div id="no-quests" class="text-center text-muted" style="display: none;">
+                <span class="icon-journal" style="font-size: 3rem;"></span>
+                <p class="mt-2">No quests yet. Add your first quest above!</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+class QuestManager {
+    constructor() {
+        this.quests = this.loadFromStorage();
+        this.totalXP = this.calculateTotalXP();
+        this.questIdCounter = this.getNextId();
+        this.undoStack = this.loadUndoStack();
+        this.init();
+    }
+    
+    init() {
+        this.renderQuests();
+        this.updateTotalXP();
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        document.getElementById('add-quest-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.addQuest();
+        });
+    }
+    
+    addQuest() {
+        const name = document.getElementById('quest-name').value.trim();
+        const type = document.getElementById('quest-type').value;
+        const attribute = document.getElementById('quest-attribute').value;
+        
+        if (!name || !type || !attribute) {
+            alert('Please fill in all fields');
+            return;
+        }
+        
+        const quest = {
+            id: this.questIdCounter++,
+            name: name,
+            type: type,
+            attribute: attribute,
+            completed: false,
+            xp: this.getXPForType(type),
+            dateCreated: new Date().toISOString()
+        };
+        
+        this.quests.push(quest);
+        this.saveToStorage();
+        this.renderQuests();
+        this.clearForm();
+    }
+    
+    getXPForType(type) {
+        const xpMap = {
+            'Main': 100,
+            'Side': 50,
+            'Daily': 25,
+            'Weekly': 75
+        };
+        return xpMap[type] || 25;
+    }
+    
+    editQuest(questId) {
+        const quest = this.quests.find(q => q.id === questId);
+        if (!quest) return;
+        
+        const editForm = document.getElementById(`edit-form-${questId}`);
+        const questDisplay = document.getElementById(`quest-display-${questId}`);
+        
+        if (editForm.style.display === 'none' || editForm.style.display === '') {
+            // Show edit form
+            editForm.style.display = 'block';
+            questDisplay.style.display = 'none';
+            
+            // Populate form with current values
+            document.getElementById(`edit-name-${questId}`).value = quest.name;
+            document.getElementById(`edit-type-${questId}`).value = quest.type;
+            document.getElementById(`edit-attribute-${questId}`).value = quest.attribute;
+        } else {
+            // Hide edit form
+            this.cancelEdit(questId);
+        }
+    }
+    
+    saveEdit(questId) {
+        const quest = this.quests.find(q => q.id === questId);
+        if (!quest) return;
+        
+        const newName = document.getElementById(`edit-name-${questId}`).value.trim();
+        const newType = document.getElementById(`edit-type-${questId}`).value;
+        const newAttribute = document.getElementById(`edit-attribute-${questId}`).value;
+        
+        if (!newName || !newType || !newAttribute) {
+            alert('Please fill in all fields');
+            return;
+        }
+        
+        // Store old XP for undo functionality if quest was completed
+        if (quest.completed) {
+            this.addToUndoStack({
+                action: 'edit',
+                questId: questId,
+                oldXP: quest.xp,
+                newXP: this.getXPForType(newType)
+            });
+        }
+        
+        quest.name = newName;
+        quest.type = newType;
+        quest.attribute = newAttribute;
+        quest.xp = this.getXPForType(newType);
+        
+        this.saveToStorage();
+        this.renderQuests();
+        this.updateTotalXP();
+    }
+    
+    cancelEdit(questId) {
+        const editForm = document.getElementById(`edit-form-${questId}`);
+        const questDisplay = document.getElementById(`quest-display-${questId}`);
+        
+        editForm.style.display = 'none';
+        questDisplay.style.display = 'block';
+    }
+    
+    deleteQuest(questId) {
+        if (!confirm('Are you sure you want to delete this quest?')) {
+            return;
+        }
+        
+        const quest = this.quests.find(q => q.id === questId);
+        if (quest && quest.completed) {
+            // Add to undo stack if quest was completed (had XP)
+            this.addToUndoStack({
+                action: 'delete',
+                quest: { ...quest }
+            });
+        }
+        
+        this.quests = this.quests.filter(q => q.id !== questId);
+        this.saveToStorage();
+        this.renderQuests();
+        this.updateTotalXP();
+    }
+    
+    toggleComplete(questId) {
+        const quest = this.quests.find(q => q.id === questId);
+        if (!quest) return;
+        
+        const wasCompleted = quest.completed;
+        quest.completed = !quest.completed;
+        
+        // Add to undo stack
+        this.addToUndoStack({
+            action: 'toggle',
+            questId: questId,
+            wasCompleted: wasCompleted,
+            xp: quest.xp
+        });
+        
+        this.saveToStorage();
+        this.renderQuests();
+        this.updateTotalXP();
+    }
+    
+    addToUndoStack(action) {
+        this.undoStack.push(action);
+        // Keep only last 10 actions
+        if (this.undoStack.length > 10) {
+            this.undoStack.shift();
+        }
+        this.saveUndoStack();
+    }
+    
+    undo() {
+        if (this.undoStack.length === 0) {
+            alert('Nothing to undo');
+            return;
+        }
+        
+        const lastAction = this.undoStack.pop();
+        
+        switch (lastAction.action) {
+            case 'toggle':
+                const quest = this.quests.find(q => q.id === lastAction.questId);
+                if (quest) {
+                    quest.completed = lastAction.wasCompleted;
+                }
+                break;
+                
+            case 'delete':
+                this.quests.push(lastAction.quest);
+                break;
+                
+            case 'edit':
+                const editedQuest = this.quests.find(q => q.id === lastAction.questId);
+                if (editedQuest) {
+                    // Only adjust XP, don't restore other properties
+                    editedQuest.xp = lastAction.oldXP;
+                }
+                break;
+        }
+        
+        this.saveToStorage();
+        this.saveUndoStack();
+        this.renderQuests();
+        this.updateTotalXP();
+    }
+    
+    renderQuests() {
+        const container = document.getElementById('quests-container');
+        const noQuestsDiv = document.getElementById('no-quests');
+        
+        if (this.quests.length === 0) {
+            container.innerHTML = '';
+            noQuestsDiv.style.display = 'block';
+            return;
+        }
+        
+        noQuestsDiv.style.display = 'none';
+        
+        container.innerHTML = this.quests.map(quest => `
+            <div class="quest-card ${quest.completed ? 'completed-quest' : ''}" id="quest-${quest.id}">
+                <div id="quest-display-${quest.id}">
+                    <div class="quest-header">
+                        <div class="quest-title">${quest.name}</div>
+                        <div class="quest-actions">
+                            <button class="btn btn-outline-success btn-sm" onclick="questManager.toggleComplete(${quest.id})" title="${quest.completed ? 'Mark as incomplete' : 'Mark as complete'}">
+                                <span class="icon-${quest.completed ? 'check' : 'square'}"></span>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="questManager.editQuest(${quest.id})" title="Edit quest">
+                                <span class="icon-edit"></span>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="questManager.deleteQuest(${quest.id})" title="Delete quest">
+                                <span class="icon-trash"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="quest-details">
+                        <span class="badge bg-secondary me-2">${quest.type}</span>
+                        <span class="badge bg-info me-2">${quest.attribute}</span>
+                        <span class="quest-xp">+${quest.xp} XP</span>
+                        ${quest.completed ? '<span class="badge bg-success ms-2">Completed</span>' : ''}
+                    </div>
+                </div>
+                
+                <div class="edit-form" id="edit-form-${quest.id}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" id="edit-name-${quest.id}" class="form-control form-control-sm" placeholder="Quest Name">
+                        </div>
+                        <div class="col-md-3">
+                            <select id="edit-type-${quest.id}" class="form-select form-select-sm">
+                                <option value="Main">Main Quest</option>
+                                <option value="Side">Side Quest</option>
+                                <option value="Daily">Daily Quest</option>
+                                <option value="Weekly">Weekly Quest</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="edit-attribute-${quest.id}" class="form-select form-select-sm">
+                                <option value="Strength">Strength</option>
+                                <option value="Intelligence">Intelligence</option>
+                                <option value="Dexterity">Dexterity</option>
+                                <option value="Constitution">Constitution</option>
+                                <option value="Wisdom">Wisdom</option>
+                                <option value="Charisma">Charisma</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="btn-group w-100">
+                                <button class="btn btn-success btn-sm" onclick="questManager.saveEdit(${quest.id})" title="Save">
+                                    <span class="icon-save"></span>
+                                </button>
+                                <button class="btn btn-secondary btn-sm" onclick="questManager.cancelEdit(${quest.id})" title="Cancel">
+                                    <span class="icon-cancel"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    updateTotalXP() {
+        this.totalXP = this.calculateTotalXP();
+        document.getElementById('xp-amount').textContent = this.totalXP;
+        
+        // Add undo button if there are actions in the undo stack
+        const existingUndoBtn = document.getElementById('undo-btn');
+        if (existingUndoBtn) {
+            existingUndoBtn.remove();
+        }
+        
+        if (this.undoStack.length > 0) {
+            const undoBtn = document.createElement('button');
+            undoBtn.id = 'undo-btn';
+            undoBtn.className = 'btn btn-warning btn-sm ms-2';
+            undoBtn.innerHTML = '<span class="icon-undo"></span> Undo';
+            undoBtn.onclick = () => this.undo();
+            document.getElementById('total-xp').appendChild(undoBtn);
+        }
+    }
+    
+    calculateTotalXP() {
+        return this.quests
+            .filter(quest => quest.completed)
+            .reduce((total, quest) => total + quest.xp, 0);
+    }
+    
+    clearForm() {
+        document.getElementById('quest-name').value = '';
+        document.getElementById('quest-type').value = '';
+        document.getElementById('quest-attribute').value = '';
+    }
+    
+    getNextId() {
+        return this.quests.length > 0 ? Math.max(...this.quests.map(q => q.id)) + 1 : 1;
+    }
+    
+    saveToStorage() {
+        localStorage.setItem('quests', JSON.stringify(this.quests));
+    }
+    
+    loadFromStorage() {
+        const saved = localStorage.getItem('quests');
+        return saved ? JSON.parse(saved) : [];
+    }
+    
+    saveUndoStack() {
+        localStorage.setItem('questUndoStack', JSON.stringify(this.undoStack));
+    }
+    
+    loadUndoStack() {
+        const saved = localStorage.getItem('questUndoStack');
+        return saved ? JSON.parse(saved) : [];
+    }
+}
+
+// Initialize quest manager when page loads
+let questManager;
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        questManager = new QuestManager();
+    });
+} else {
+    questManager = new QuestManager();
+}
+</script>
+</body>
+</html>
